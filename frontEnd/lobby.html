@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Lobby Browser</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: 'Segoe UI', sans-serif;
+    }
+
+    body {
+      margin: 0;
+      padding: 2rem;
+      background-color: #f0f2f5;
+      color: #333;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    h1 {
+      font-size: 2rem;
+      margin-bottom: 1rem;
+    }
+
+    .section {
+      background: #fff;
+      padding: 2rem;
+      border-radius: 12px;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+      width: 100%;
+      max-width: 500px;
+      margin-bottom: 2rem;
+    }
+
+    .section h2 {
+      margin-bottom: 1rem;
+      font-size: 1.2rem;
+      color: #555;
+    }
+
+    .lobby-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .lobby-item {
+      padding: 1rem;
+      background-color: #fafafa;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    input[type="text"] {
+      width: 100%;
+      padding: 0.75rem;
+      margin-top: 1rem;
+      margin-bottom: 0.5rem;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
+
+    button {
+      padding: 0.5rem 1rem;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.95rem;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+
+    .message {
+      margin-top: 1rem;
+      font-size: 0.95rem;
+      color: green;
+      text-align: center;
+    }
+
+    .error {
+      color: red;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Game Lobbies</h1>
+
+  <div class="section">
+    <h2>Create a Lobby</h2>
+    <button onclick="createLobby()">Create New Lobby</button>
+    <div id="createMessage" class="message"></div>
+    <div id="createdLobbies" class="lobby-list" style="margin-top: 1rem;"></div>
+  </div>
+
+  <div class="section">
+    <h2>Join a Lobby with a Code</h2>
+    <input type="text" id="manualLobbyId" placeholder="Enter lobby code..." />
+    <button onclick="manualJoin()">Join Lobby</button>
+  </div>
+
+  <script>
+    const userId = sessionStorage.getItem("userId");
+
+    async function getLocation() {
+      return new Promise((resolve, reject) => {
+        if (!navigator.geolocation) {
+          reject("Geolocation not supported.");
+          return;
+        }
+
+        navigator.geolocation.getCurrentPosition(position => {
+          const coords = {
+            latitude: position.coords.latitude,
+            longitude: position.coords.longitude
+          };
+          resolve(coords);
+        }, () => reject("Unable to retrieve location."));
+      });
+    }
+
+    async function createLobby() {
+      const messageDiv = document.getElementById("createMessage");
+      const listDiv = document.getElementById("createdLobbies");
+      messageDiv.textContent = "";
+      messageDiv.classList.remove("error");
+
+      if (!userId) {
+        messageDiv.textContent = "User ID not found in session.";
+        messageDiv.classList.add("error");
+        return;
+      }
+
+      try {
+        const location = await getLocation();
+        const response = await fetch(`http://localhost:8080/api/lobby/create/${userId}`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(location)
+        });
+
+        if (!response.ok) {
+          messageDiv.textContent = "Server error while creating lobby.";
+          messageDiv.classList.add("error");
+          return;
+        }
+
+        const data = await response.json();
+
+        if (!data.id) {
+          messageDiv.textContent = "Lobby created but no ID returned.";
+          messageDiv.classList.add("error");
+          return;
+        }
+
+        messageDiv.textContent = "Lobby created!";
+        addLobbyToList(data.id);
+
+      } catch (err) {
+        console.error(err);
+        messageDiv.textContent = "Error: " + err;
+        messageDiv.classList.add("error");
+      }
+    }
+
+    function addLobbyToList(lobbyId) {
+      const list = document.getElementById("createdLobbies");
+
+      const lobbyDiv = document.createElement("div");
+      lobbyDiv.className = "lobby-item";
+      lobbyDiv.innerHTML = `
+        <span>Lobby Code: <strong>${lobbyId}</strong></span>
+        <button onclick="joinLobby('${lobbyId}')">Join</button>
+      `;
+
+      list.appendChild(lobbyDiv);
+    }
+
+    async function joinLobby(lobbyId) {
+      if (!userId) {
+        alert("User ID not found in session.");
+        return;
+      }
+
+      try {
+        const location = await getLocation();
+        const response = await fetch(`http://localhost:8080/api/lobby/join/${lobbyId}/${userId}`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(location)
+        });
+
+        if (!response.ok) {
+          alert("Failed to join lobby.");
+          return;
+        }
+
+        sessionStorage.setItem("lobbyId", lobbyId);
+        window.location.href = "Test.html";
+
+      } catch (err) {
+        console.error("Join error:", err);
+        alert("Error: " + err);
+      }
+    }
+
+    function manualJoin() {
+      const lobbyId = document.getElementById("manualLobbyId").value.trim();
+      if (lobbyId) {
+        joinLobby(lobbyId);
+      } else {
+        alert("Please enter a valid lobby code.");
+      }
+    }
+  </script>
+
+</body>
+</html>

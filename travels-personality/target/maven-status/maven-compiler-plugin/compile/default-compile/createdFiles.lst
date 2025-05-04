@@ -1,0 +1,16 @@
+com\example\personalityapi\LoginCredentials.class
+com\example\personalityapi\LobbyRepository.class
+com\example\personalityapi\UserRepository.class
+com\example\personalityapi\GeminiService.class
+com\example\personalityapi\PersonalityApiApplication.class
+com\example\personalityapi\UserController.class
+com\example\personalityapi\UserService.class
+com\example\personalityapi\LocationDTO.class
+com\example\personalityapi\PersonalityRequest.class
+com\example\personalityapi\LobbyController.class
+com\example\personalityapi\LobbyService.class
+com\example\personalityapi\LoginRequest.class
+com\example\personalityapi\User.class
+com\example\personalityapi\Lobby.class
+com\example\personalityapi\Personality.class
+com\example\personalityapi\Data.class

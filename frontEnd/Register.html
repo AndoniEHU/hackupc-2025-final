@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Register</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: 'Segoe UI', sans-serif;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: #f5f7fa;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .register-container {
+      background-color: #fff;
+      padding: 2rem;
+      border-radius: 12px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+      width: 100%;
+      max-width: 400px;
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 1.5rem;
+      font-weight: 500;
+      color: #333;
+    }
+
+    input[type="text"],
+    input[type="email"],
+    input[type="password"],
+    select {
+      width: 100%;
+      padding: 0.75rem;
+      margin-bottom: 1rem;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      background-color: #fafafa;
+    }
+
+    button {
+      width: 100%;
+      padding: 0.75rem;
+      border: none;
+      border-radius: 8px;
+      background-color: #28a745;
+      color: white;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+    }
+
+    button:hover {
+      background-color: #218838;
+    }
+
+    .footer {
+      text-align: center;
+      margin-top: 1rem;
+      font-size: 0.9rem;
+      color: #777;
+    }
+
+    .footer a {
+      color: #007bff;
+      text-decoration: none;
+    }
+
+    .footer a:hover {
+      text-decoration: underline;
+    }
+
+    .message {
+      text-align: center;
+      margin-bottom: 1rem;
+      font-size: 0.95rem;
+      display: none;
+    }
+
+    .error-message {
+      color: red;
+    }
+
+    .success-message {
+      color: green;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="register-container">
+    <h2>Create Account</h2>
+    <div id="message" class="message"></div>
+    <form id="registerForm">
+      <input id="name" type="text" placeholder="First Name" required />
+      <input id="surname" type="text" placeholder="Last Name" required />
+      <input id="city" type="text" placeholder="Country" required />
+      <input id="email" type="email" placeholder="Email" required />
+      <input id="pswd" type="password" placeholder="Password" required />
+      <input id="pswdCheck" type="password" placeholder="Confirm Password" required />
+      <button type="submit">Register</button>
+    </form>
+    <div class="footer">
+      Already have an account? <a href="login.html">Log in</a>
+    </div>
+  </div>
+
+  <script>
+    document.getElementById("registerForm").addEventListener("submit", async function(e) {
+      e.preventDefault();
+
+      const name = document.getElementById("name").value;
+      const surname = document.getElementById("surname").value;
+      const country = document.getElementById("city").value;
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("pswd").value;
+      const confirmPassword = document.getElementById("pswdCheck").value;
+
+      const messageDiv = document.getElementById("message");
+      messageDiv.style.display = "none";
+      messageDiv.classList.remove("error-message", "success-message");
+
+      try {
+        const response = await fetch("http://localhost:8080/api/register", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            name: name,
+            surname: surname,
+            country: country,
+            email: email,
+            password: password,
+            confirmPassword: confirmPassword
+          })
+        });
+
+        if (response.status === 500) {
+          messageDiv.textContent = "Registration failed. Please check your details and try again.";
+          messageDiv.classList.add("error-message");
+          messageDiv.style.display = "block";
+          return;
+        }
+
+        if (!response.ok) {
+          messageDiv.textContent = "Unexpected error. Please try again.";
+          messageDiv.classList.add("error-message");
+          messageDiv.style.display = "block";
+          return;
+        }
+
+        // If successful:
+        messageDiv.textContent = "Account successfully created! You can now log in.";
+        messageDiv.classList.add("success-message");
+        messageDiv.style.display = "block";
+
+      } catch (error) {
+        console.error("Registration error:", error);
+        messageDiv.textContent = "Server error. Please try again later.";
+        messageDiv.classList.add("error-message");
+        messageDiv.style.display = "block";
+      }
+    });
+  </script>
+
+</body>
+</html>

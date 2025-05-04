@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Waiting... </title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: #f7f7f7;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      font-family: Arial, sans-serif;
+    }
+
+    .loader-container {
+      text-align: center;
+    }
+
+    .loader {
+      border: 8px solid #e0e0e0;
+      border-top: 8px solid #3498db;
+      border-radius: 50%;
+      width: 80px;
+      height: 80px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 20px auto;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .loading-text {
+      font-size: 1.2rem;
+      color: #555;
+    }
+  </style>
+</head>
+<body>
+  <div class="loader-container">
+    <div class="loader"></div>
+    <div class="loading-text">
+      Waiting... Once all of your friends have done the test, the system will decide what's the best place.
+    </div>
+  </div>
+
+  <script>
+    const lobbyId = sessionStorage.getItem("lobbyId");
+
+    async function checkLobbyResult() {
+      if (!lobbyId) {
+        alert("Lobby ID not found in session.");
+        return;
+      }
+
+      try {
+        const response = await fetch(`http://localhost:8080/api/lobby/search/${lobbyId}`);
+
+        if (!response.ok) {
+          console.error("Failed to fetch result:", response.status);
+          return;
+        }
+
+        const data = await response.json();
+
+        if (data.destination && data.country) {
+          sessionStorage.setItem("destination", data.destination);
+          sessionStorage.setItem("country", data.country);
+          window.location.href = "result.html";
+        } else {
+          console.log("Waiting for complete data...");
+          setTimeout(checkLobbyResult, 2000); // Retry in 2s
+        }
+
+      } catch (error) {
+        console.error("Error:", error);
+        setTimeout(checkLobbyResult, 3000); // Retry on error
+      }
+    }
+
+    checkLobbyResult();
+  </script>
+</body>
+</html>

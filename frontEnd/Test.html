@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Animal Test</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: 'Segoe UI', sans-serif;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: #f5f7fa;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .container {
+      background-color: #fff;
+      padding: 2rem;
+      border-radius: 12px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+      width: 100%;
+      max-width: 500px;
+      text-align: center;
+    }
+
+    h2 {
+      margin-bottom: 1.5rem;
+      color: #333;
+    }
+
+    .options button {
+      width: 100%;
+      padding: 0.75rem;
+      margin: 0.5rem 0;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      background-color: #fafafa;
+      color: #333;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+    }
+
+    .options button:hover {
+      background-color: #e0e0e0;
+    }
+
+    #botonFinal {
+      margin-top: 2rem;
+      padding: 10px 20px;
+      font-size: 16px;
+      border: none;
+      border-radius: 8px;
+      background-color: #28a745;
+      color: white;
+      cursor: pointer;
+    }
+
+    #botonFinal:hover {
+      background-color: #218838;
+    }
+
+    #startBtn {
+      padding: 12px 24px;
+      font-size: 16px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+    }
+
+    #startBtn:hover {
+      background-color: #0056b3;
+    }
+  </style>
+</head>
+<body>
+
+ <div id="intro" class="container">
+  <h2>Which Animal Are You? 🐾</h2>
+  <p>
+    Welcome, brave adventurer! 🌍<br /><br />
+    You're about to take the *most scientifically questionable but spiritually enlightening* quiz of your life.<br /><br />
+    Your answers will help us uncover your inner animal and match you with the perfect place to thrive. Jungle cat? Cozy sloth? Maybe a sea otter with a love for sushi? 🦁🦥🦦<br /><br />
+    Ready to find out who you *really* are inside? Let's go!
+  </p>
+  <button id="startBtn">Unleash My Spirit Animal 🧭</button>
+</div>
+
+  <div id="quiz" class="container" style="display: none;">
+    <h2 id="Question">You're alone in a jungle, what do you do?</h2>
+    <div class="options">
+      <button id="Answ1" class="answer">Look for shelter in a cave</button>
+      <button id="Answ2" class="answer">Try building your own shelter</button>
+      <button id="Answ3" class="answer">Forage for food before anything else</button>
+      <button id="Answ4" class="answer">Hunt for food before anything else</button>
+    </div>
+    <button id="botonFinal" onclick="finalizar()" hidden>Finish Test</button>
+  </div>
+
+  <script>
+    const qHeader = document.getElementById('Question');
+    const aHeader1 = document.getElementById('Answ1');
+    const aHeader2 = document.getElementById('Answ2');
+    const aHeader3 = document.getElementById('Answ3');
+    const aHeader4 = document.getElementById('Answ4');
+    const finishButton = document.getElementById('botonFinal');
+    const introScreen = document.getElementById('intro');
+    const quizScreen = document.getElementById('quiz');
+    const startBtn = document.getElementById('startBtn');
+
+    const qArray = [
+      "You're alone in a jungle, what do you do?",
+      "When thinking about your desired home, what do you picture?",
+      "You end up stranded in an island, what of these item do you chose to bring instead of the others?",
+      "What is your favourite holiday?",
+      "Which of these three sets of characteristics best defines your personality?",
+      "What type of sport do you prefer?",
+      "If you could only choose one type of food to eat, what would it be?"
+    ];
+
+    const aArray1 = [
+      "Look for shelter in a cave",
+      "A wooden cabin next to a lake",
+      "A tent",
+      "Christmas",
+      "Cheerful, creative and active",
+      "Running",
+      "Meat whenever possible, couldn't live without it"
+    ];
+
+    const aArray2 = [
+      "Try building your own shelter",
+      "A small apartment in your favourite city",
+      "A hatchet",
+      "Valentine's day",
+      "Strong, brave and a good leader",
+      "Varied activities: dancing, aeorbics, swimming, etc.",
+      "Fruit. Love it's freshness!!"
+    ];
+
+    const aArray3 = [
+      "Forage for food before anything else",
+      "A nomad lifestyle",
+      "Flint and steel",
+      "Halloween",
+      "Family-oriented, supportive and persistent",
+      "Physical agility exercises that challenge my abilities",
+      "Vegetables, delitious and healthy"
+    ];
+
+    const aArray4 = [
+      "Hunt for food before anything else",
+      "A mansion in the outskirts of Hollywood",
+      "An emergency inflatable boat",
+      "Carnival",
+      "Observant, methodical and agile",
+      "Walking calmly, I'm not really into sports",
+      "Fish. Seafood drives me crazy!"
+    ];
+
+    const answers = {};
+    let currentQuestion = 0;
+
+    const userId = sessionStorage.getItem("userId");
+
+    startBtn.onclick = function() {
+      introScreen.style.display = 'none';
+      quizScreen.style.display = 'block';
+      loadQuestion(currentQuestion);
+    };
+
+    function loadQuestion(index) {
+      qHeader.textContent = qArray[index];
+      aHeader1.textContent = aArray1[index];
+      aHeader2.textContent = aArray2[index];
+      aHeader3.textContent = aArray3[index];
+      aHeader4.textContent = aArray4[index];
+    }
+
+    document.querySelectorAll('.answer').forEach(button => {
+      button.onclick = function() {
+        const answerText = button.textContent;
+        const fullQ = qArray[currentQuestion] + " User answer: " + answerText;
+        answers["q" + (currentQuestion + 1)] = fullQ;
+
+        currentQuestion++;
+        if (currentQuestion < qArray.length) {
+          loadQuestion(currentQuestion);
+        } else {
+          finishButton.hidden = false;
+        }
+      };
+    });
+
+    async function finalizar() {
+      const payload = {
+        userId: userId,
+        ...answers
+      };
+
+      try {
+        const response = await fetch("http://localhost:8080/api/analyze", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+
+        if (response.ok) {
+          window.location.href = "cargar.html";
+        } else {
+          alert("Error sending test data.");
+        }
+      } catch (err) {
+        console.error("Failed to send:", err);
+        alert("Network or server error.");
+      }
+    }
+  </script>
+</body>
+</html>
